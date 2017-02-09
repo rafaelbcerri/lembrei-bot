@@ -1,0 +1,14 @@
+{
+  "name": "LembreiBot",
+  "version": "0.0.1",
+  "description": "Um chat bot para te ajudar a nunca mais esquecer das coisas.",
+  "main": "index.js",
+  "repository": {},
+  "author": "rafaelbcerri",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.16.0",
+    "express": "^4.14.1",
+    "request": "^2.79.0"
+  }
+}
