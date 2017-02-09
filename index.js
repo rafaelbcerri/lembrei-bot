@@ -1,39 +1,37 @@
-'use strict';
+"use strict";
 
 const 
-  bodyParser = require('body-parser'),
-  express = require('express'),
-  request = require('request');
+  bodyParser = require("body-parser"),
+  express = require("express"),
+  request = require("request"),
+  facebookAPI = require("./facebook-api.js");
   
 const app = express();
-app.set('port', process.env.PORT || 5000);
+app.set("port", process.env.PORT || 5000);
 // app.use(bodyParser.json({ verify: verifyRequestSignature }));
 app.use(bodyParser.json());
 
-app.get('/', function(req, res){
+app.get("/", (req, res) => {
   res.send("Hello World, I'm a brazilian chat bot enter on m.me/lembreiBot to talk with me!");
 });
 
-app.get('/webhook', function(req, res) {
-  if (req.query['hub.mode'] === 'subscribe' &&
-      req.query['hub.verify_token'] === (process.env.FACEBOOK_VALIDATION_TOKEN)) {
+app.get("/webhook", (req, res) => {
+  if (req.query["hub.mode"] === "subscribe" &&
+      req.query["hub.verify_token"] === (process.env.FACEBOOK_VALIDATION_TOKEN)) {
     console.log("Validating webhook");
-    res.status(200).send(req.query['hub.challenge']);
+    res.status(200).send(req.query["hub.challenge"]);
   } else {
     console.error("Failed validation. Make sure the validation tokens match.");
     res.sendStatus(403);          
   }  
 });
 
-app.post('/webhook', function (req, res) {
+app.post("/webhook", (req, res) => {
   var data = req.body;
 
-  if (data.object === 'page') {
-    data.entry.forEach(function(entry) {
-      var pageID = entry.id;
-      var timeOfEvent = entry.time;
-
-      entry.messaging.forEach(function(event) {
+  if (data.object === "page") {
+    data.entry.forEach((entry) => {
+      entry.messaging.forEach((event) => {
         if (event.message) {
           receivedMessage(event);
         } else {
@@ -46,7 +44,7 @@ app.post('/webhook', function (req, res) {
   }
 });
   
-function receivedMessage(event) {
+const receivedMessage = (event) => {
   var senderID = event.sender.id;
   var recipientID = event.recipient.id;
   var timeOfMessage = event.timestamp;
@@ -56,8 +54,6 @@ function receivedMessage(event) {
     senderID, recipientID, timeOfMessage);
   console.log(JSON.stringify(message));
 
-  var messageId = message.mid;
-
   var messageText = message.text;
   var messageAttachments = message.attachments;
 
@@ -66,7 +62,7 @@ function receivedMessage(event) {
     // If we receive a text message, check to see if it matches a keyword
     // and send back the example. Otherwise, just echo the text we received.
     switch (messageText) {
-      case 'generic':
+      case "generic":
         sendGenericMessage(senderID);
         break;
 
@@ -78,11 +74,11 @@ function receivedMessage(event) {
   }
 }
 
-function sendGenericMessage(recipientId, messageText) {
+const sendGenericMessage = (recipientId, messageText) => {
   // To be expanded in later sections
 }
 
-function sendTextMessage(recipientId, messageText) {
+const sendTextMessage = (recipientId, messageText) => {
   var messageData = {
     recipient: {
       id: recipientId
@@ -92,33 +88,11 @@ function sendTextMessage(recipientId, messageText) {
     }
   };
 
-  callSendAPI(messageData);
+  facebookAPI.sendMessage(messageData);
 }
 
-function callSendAPI(messageData) {
-  request({
-    url: 'https://graph.facebook.com/v2.6/me/messages',
-    qs: { access_token: process.env.PAGE_ACCESS_TOKEN },
-    method: 'POST',
-    json: messageData
-
-  }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-      var recipientId = body.recipient_id;
-      var messageId = body.message_id;
-
-      console.log("Successfully sent generic message with id %s to recipient %s", 
-        messageId, recipientId);
-    } else {
-      console.error("Unable to send message.");
-      console.error(response);
-      console.error(error);
-    }
-  });  
-}
-
-app.listen(app.get('port'), function() {
-  console.log('Node app is running on port', app.get('port'));
+app.listen(app.get("port"), () => {
+  console.log("Node app is running on port", app.get("port"));
 });
 
 
