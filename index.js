@@ -1,15 +1,19 @@
 "use strict";
 
+
 const 
+  opbeat = require('opbeat').start(),
   bodyParser = require("body-parser"),
   express = require("express"),
-  request = require("request"),
   facebookAPI = require("./facebook-api.js");
   
 const app = express();
+
 app.set("port", process.env.PORT || 5000);
+
 // app.use(bodyParser.json({ verify: verifyRequestSignature }));
 app.use(bodyParser.json());
+app.use(opbeat.middleware.express());
 
 app.get("/", (req, res) => {
   res.send("Hello World, I'm a brazilian chat bot enter on m.me/lembreiBot to talk with me!");
@@ -47,7 +51,7 @@ app.post("/webhook", (req, res) => {
   }
 });
 
-facebookAPI.setGretting()
+facebookAPI.setGretting();
   
 const receivedMessage = (event) => {
   var senderID = event.sender.id;
@@ -158,5 +162,3 @@ const sendTextMessage = (recipientId, messageText) => {
 app.listen(app.get("port"), () => {
   console.log("Node app is running on port", app.get("port"));
 });
-
-
