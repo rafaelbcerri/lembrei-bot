@@ -36,6 +36,7 @@ app.get("/webhook", (req, res) => {
   }  
 });
 
+facebookAPI.setGretting();
 
 app.post("/webhook", (req, res) => {
   var data = req.body;
@@ -56,8 +57,6 @@ app.post("/webhook", (req, res) => {
     res.sendStatus(200);
   }
 });
-
-facebookAPI.setGretting();
   
 const receivedMessage = (event) => {
   var senderID = event.sender.id;

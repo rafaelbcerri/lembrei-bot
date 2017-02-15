@@ -33,9 +33,8 @@ module.exports.sendMessage = (messageData) => {
 
 module.exports.setGretting = () => {
   request({
-    url: "https://graph.facebook.com/v2.6/me/messages",
+    url: "https://graph.facebook.com/v2.6/me/thread_settings",
     qs: { 
-      thread_settings: true
       access_token: PAGE_ACCESS_TOKEN
     },
     method: "POST",
@@ -48,16 +47,11 @@ module.exports.setGretting = () => {
   }, (error, response, body) => {
       
     if (!error && response.statusCode == 200) {
-      const recipientId = body.recipient_id;
-      const messageId = body.message_id;
-
-      console.log("Successfully sent greeting message with id %s to recipient %s", 
-        messageId, recipientId);
+      console.log("Successfully set greeting.");
     } else {
-      console.error("Unable to send greeting message.");
+      console.error("Unable to set greeting.");
       console.error(response);
       console.error(error);
     }
-    
   });  
 };  
