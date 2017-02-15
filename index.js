@@ -1,12 +1,18 @@
 "use strict";
 
-
 const 
   opbeat = require('opbeat').start(),
   bodyParser = require("body-parser"),
+  config = require('config'),
   express = require("express"),
   facebookAPI = require("./facebook-api.js");
-  
+
+const FACEBOOK_VALIDATION_TOKEN = (process.env.FACEBOOK_VALIDATION_TOKEN) ?
+  (process.env.FACEBOOK_VALIDATION_TOKEN) :
+  config.get('facebookValidationToken');
+
+
+
 const app = express();
 
 app.set("port", process.env.PORT || 5000);
@@ -21,7 +27,7 @@ app.get("/", (req, res) => {
 
 app.get("/webhook", (req, res) => {
   if (req.query["hub.mode"] === "subscribe" &&
-      req.query["hub.verify_token"] === (process.env.FACEBOOK_VALIDATION_TOKEN)) {
+      req.query["hub.verify_token"] === FACEBOOK_VALIDATION_TOKEN) {
     console.log("Validating webhook");
     res.status(200).send(req.query["hub.challenge"]);
   } else {
