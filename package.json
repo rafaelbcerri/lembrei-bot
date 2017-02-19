@@ -11,6 +11,7 @@
     "config": "^1.25.1",
     "express": "^4.14.1",
     "opbeat": "^4.11.0",
-    "request": "^2.79.0"
+    "request": "^2.79.0",
+    "request-promise": "^4.1.1"
   }
 }
