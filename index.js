@@ -36,7 +36,12 @@ app.get("/webhook", (req, res) => {
   }  
 });
 
+facebookAPI.setDomainWhitelisting()
+  .then(() => {
+    facebookAPI.setPersistentMenu();
+});
 facebookAPI.setGretting();
+facebookAPI.setGetStartedButton();
 
 app.post("/webhook", (req, res) => {
   var data = req.body;
@@ -97,9 +102,18 @@ const receivedPostback = (event) => {
   console.log("Received postback for user %d and page %d with payload '%s' " +
     "at %d", senderID, recipientID, payload, timeOfPostback);
 
-  // When a postback is called, we'll send a message back to the sender to 
-  // let them know it was successful
-  sendTextMessage(senderID, "Postback called");
+
+  if ( payload == "GET_STARTED_BUTTON" ) {
+    facebookAPI.getPublicProfile(event.sender)
+      .then((userPublicProfile) => {
+        sendTextMessage(senderID, "Oi, " + userPublicProfile.first_name + " vamos começar");
+      });
+  } else {
+    // When a postback is called, we'll send a message back sto the sender to
+    // let them know it was successful
+    sendTextMessage(senderID, "Postback called");
+  }
+
 };
 
 
