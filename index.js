@@ -5,13 +5,19 @@ const
   bodyParser = require("body-parser"),
   config = require('config'),
   express = require("express"),
-  facebookAPI = require("./facebook-api.js");
+  mongoose = require("mongoose"),
+  facebookAPI = require("./facebook-api.js"),
+  User = require("./models/user");
 
 const FACEBOOK_VALIDATION_TOKEN = (process.env.FACEBOOK_VALIDATION_TOKEN) ?
   (process.env.FACEBOOK_VALIDATION_TOKEN) :
   config.get('facebookValidationToken');
 
+const MONGODB_URI = (process.env.MONGODB_URI) ?
+  (process.env.MONGODB_URI) :
+  config.get('mongoDBUri');
 
+const db = mongoose.connect(MONGODB_URI);
 
 const app = express();
 
@@ -106,6 +112,20 @@ const receivedPostback = (event) => {
   if ( payload == "GET_STARTED_BUTTON" ) {
     facebookAPI.getPublicProfile(event.sender)
       .then((userPublicProfile) => {
+
+        const newUser = new User({
+          userId: senderID,
+          firstName: userPublicProfile.first_name,
+          lastName: userPublicProfile.last_name,
+          gender: userPublicProfile.gender
+        });
+
+        newUser.save(function (err) {
+          if(err) {
+            console.log("Error on saving new user", err);
+          }
+        });
+
         sendTextMessage(senderID, "Oi, " + userPublicProfile.first_name + " vamos começar");
       });
   } else {
