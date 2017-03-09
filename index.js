@@ -46,7 +46,6 @@ facebookAPI.initiate();
 
 app.post("/webhook", (req, res) => {
   var data = req.body;
-  console.log(data);
 
   if (data.object === "page") {
     data.entry.forEach((entry) => {
