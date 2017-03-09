@@ -21,15 +21,12 @@ module.exports.sendMessage = (messageData) => {
         messageId, recipientId);
   })
   .catch((error)=> {
-    console.error("Unable to send message.");
-    console.error("Error StatusCode:", error.statusCode);
-    console.error("Error Message:", error.message);
-    console.error("Error Request Options:", error.options);
+    handleError(error, "Unable to send message.");
   });
 };
 
 module.exports.setGretting = () => {
-  requestPromise({
+  return requestPromise({
     url: "https://graph.facebook.com/v2.6/me/thread_settings",
     qs: { access_token: PAGE_ACCESS_TOKEN },
     method: "POST",
@@ -44,15 +41,12 @@ module.exports.setGretting = () => {
     console.log("Successfully set greeting.");
   })
   .catch((error)=> {
-    console.error("Unable to set greeting.");
-    console.error("Error StatusCode:", error.statusCode);
-    console.error("Error Message:", error.message);
-    console.error("Error Request Options:", error.options);
+    handleError(error, "Unable to set greeting.");
   });
 };
 
 module.exports.setGetStartedButton = () => {
-  requestPromise({
+  return requestPromise({
     url: "https://graph.facebook.com/v2.6/me/thread_settings",
     qs: {
       access_token: PAGE_ACCESS_TOKEN
@@ -67,18 +61,15 @@ module.exports.setGetStartedButton = () => {
     }
   })
   .then((body) => {
-    console.log("Successfully set getStartedButton.");
+    console.log("Successfully set startButton.");
   })
   .catch((error)=> {
-    console.error("Unable to set getStartedButton.");
-    console.error("Error StatusCode:", error.statusCode);
-    console.error("Error Message:", error.message);
-    console.error("Error Request Options:", error.options);
+    handleError(error, "Unable to set startButton.");
   });
 };
 
 module.exports.setPersistentMenu = () => {
-  requestPromise({
+  return requestPromise({
     url: "https://graph.facebook.com/v2.6/me/thread_settings",
     qs: { 
       access_token: PAGE_ACCESS_TOKEN
@@ -104,13 +95,10 @@ module.exports.setPersistentMenu = () => {
     }
   })
   .then((body) => {
-    console.log("Successfully set setPersistentMenu.");
+    console.log("Successfully set persistentMenu.");
   })
   .catch((error)=> {
-    console.error("Unable to set setPersistentMenu.");
-    console.error("Error StatusCode:", error.statusCode);
-    console.error("Error Message:", error.message);
-    console.error("Error Request Options:", error.options);
+    handleError(error, "Unable to set persistentMenu.");
   });
 };
 
@@ -128,34 +116,42 @@ module.exports.setDomainWhitelisting = () => {
     }
   })
   .then((body) => {
-    console.log("Successfully set setDomainWhitelisting.");
+    console.log("Successfully set domainWhitelisting.");
   })
   .catch((error)=> {
-    console.error("Unable to set setDomainWhitelisting.");
-    console.error("Error StatusCode:", error.statusCode);
-    console.error("Error Message:", error.message);
-    console.error("Error Request Options:", error.options);
+    handleError(error, "Unable to set domainWhitelisting.");
   });
 };
 
 module.exports.getPublicProfile = (user) => {
-  return (
-    requestPromise({
-      url: "https://graph.facebook.com/v2.6/" + user.id,
-      qs: {
-        access_token: PAGE_ACCESS_TOKEN
-      },
-      method: "Get"
-    })
-    .then((body) => {
-      console.log("Successfully set userPublicProfile.");
-      return JSON.parse(body);
-    })
-    .catch((error)=> {
-      console.error("Unable to set userPublicProfile.");
-      console.error("Error StatusCode:", error.statusCode);
-      console.error("Error Message:", error.message);
-      console.error("Error Request Options:", error.options);
-    })
-  );
+  return requestPromise({
+    url: "https://graph.facebook.com/v2.6/" + user.id,
+    qs: {
+      access_token: PAGE_ACCESS_TOKEN
+    },
+    method: "Get"
+  })
+  .then((body) => {
+    console.log("Successfully set userPublicProfile.");
+    return JSON.parse(body);
+  })
+  .catch((error)=> {
+    handleError(error, "Unable to set userPublicProfile.");
+  });
+};
+
+module.exports.initiate = () => {
+  this.setGretting();
+  this.setGetStartedButton();
+  this.setDomainWhitelisting()
+  .then(() => {
+    this.setPersistentMenu();
+  });
+};
+
+const handleError = (error, message) => {
+  console.error(message);
+  console.error("Error StatusCode:", error.statusCode);
+  console.error("Error Message:", error.message);
+  console.error("Error Request Options:", error.options);
 };

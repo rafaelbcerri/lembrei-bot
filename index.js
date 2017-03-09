@@ -42,15 +42,11 @@ app.get("/webhook", (req, res) => {
   }  
 });
 
-facebookAPI.setDomainWhitelisting()
-  .then(() => {
-    facebookAPI.setPersistentMenu();
-});
-facebookAPI.setGretting();
-facebookAPI.setGetStartedButton();
+facebookAPI.initiate();
 
 app.post("/webhook", (req, res) => {
   var data = req.body;
+  console.log(data);
 
   if (data.object === "page") {
     data.entry.forEach((entry) => {
@@ -115,9 +111,9 @@ const receivedPostback = (event) => {
       .then((userPublicProfile) => {
 
         UserController.addNewUser(
-          senderID, 
-          userPublicProfile.first_name, 
-          userPublicProfile.last_name, 
+          senderID,
+          userPublicProfile.first_name,
+          userPublicProfile.last_name,
           userPublicProfile.gender
         );
 
@@ -130,8 +126,6 @@ const receivedPostback = (event) => {
   }
 
 };
-
-
 
 const sendGenericMessage = (recipientId) => {
   const messageData = {
