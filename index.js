@@ -34,36 +34,38 @@ app.get("/", (req, res) => {
 app.get("/webhook", (req, res) => {
   if (req.query["hub.mode"] === "subscribe" &&
       req.query["hub.verify_token"] === FACEBOOK_VALIDATION_TOKEN) {
-    console.log("Validating webhook");
+    console.log("Success validation.");
     res.status(200).send(req.query["hub.challenge"]);
+    facebookAPI.initiate();
   } else {
     console.error("Failed validation. Make sure the validation tokens match.");
     res.sendStatus(403);          
   }  
 });
 
-facebookAPI.initiate();
-
 app.post("/webhook", (req, res) => {
-  var data = req.body;
+  const body = req.body;
 
-  if (data.object === "page") {
-    data.entry.forEach((entry) => {
+  if (body.object === "page") {
+    body.entry.forEach((entry) => {
       entry.messaging.forEach((event) => {
-        
-        if (event.message) {
-          receivedMessage(event);
-        } else if (event.postback) {
-          receivedPostback(event);
-        } else {
-          console.log("Webhook received unknown event: ", event);
-        }
+        handleEvents(event);
       });
     });
 
     res.sendStatus(200);
   }
 });
+
+const handleEvents = (event) => {
+  if (event.message) {
+    receivedMessage(event);
+  } else if (event.postback) {
+    receivedPostback(event);
+  } else {
+    console.log("Webhook received unknown event: ", event);
+  }
+};
   
 const receivedMessage = (event) => {
   var senderID = event.sender.id;
@@ -116,7 +118,8 @@ const receivedPostback = (event) => {
           userPublicProfile.gender
         );
 
-        sendTextMessage(senderID, "Oi, " + userPublicProfile.first_name + " vamos começar");
+        const messageText  = "Oi, " + userPublicProfile.first_name + "!! \nEstá pronto para começar a adicionar as suas tarefas?";
+        sendTextQuickReply(senderID, messageText);
       });
   } else {
     // When a postback is called, we'll send a message back sto the sender to
@@ -171,6 +174,31 @@ const sendGenericMessage = (recipientId) => {
   };
 
   facebookAPI.sendMessage(messageData);
+};
+
+const sendTextQuickReply = (userId, messageText) => {
+  var requestJson = {
+    recipient: {
+      id: userId
+    },
+    message:{
+      text: messageText,
+      quick_replies:[
+        {
+          content_type: "text",
+          title: "Sim 👍👍",
+          payload: "STARTUP_YES"
+        },
+        {
+          content_type: "text",
+          title: "Ainda não 👎",
+          payload: "STARTUP_NO"
+        }
+      ]
+    }
+  };
+
+  facebookAPI.sendTextQuickReply(requestJson);
 };
 
 const sendTextMessage = (recipientId, messageText) => {
