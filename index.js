@@ -7,7 +7,7 @@ const
   express = require("express"),
   mongoose = require("mongoose"),
   facebookAPI = require("./facebook-api.js"),
-  User = require("./models/user");
+  UserController = require("./controller/user.js");
 
 const FACEBOOK_VALIDATION_TOKEN = (process.env.FACEBOOK_VALIDATION_TOKEN) ?
   (process.env.FACEBOOK_VALIDATION_TOKEN) :
@@ -17,7 +17,7 @@ const MONGODB_URI = (process.env.MONGODB_URI) ?
   (process.env.MONGODB_URI) :
   config.get('mongoDBUri');
 
-const db = mongoose.connect(MONGODB_URI);
+mongoose.connect(MONGODB_URI);
 
 const app = express();
 
@@ -55,6 +55,7 @@ app.post("/webhook", (req, res) => {
   if (data.object === "page") {
     data.entry.forEach((entry) => {
       entry.messaging.forEach((event) => {
+        
         if (event.message) {
           receivedMessage(event);
         } else if (event.postback) {
@@ -113,18 +114,12 @@ const receivedPostback = (event) => {
     facebookAPI.getPublicProfile(event.sender)
       .then((userPublicProfile) => {
 
-        const newUser = new User({
-          userId: senderID,
-          firstName: userPublicProfile.first_name,
-          lastName: userPublicProfile.last_name,
-          gender: userPublicProfile.gender
-        });
-
-        newUser.save(function (err) {
-          if(err) {
-            console.log("Error on saving new user", err);
-          }
-        });
+        UserController.addNewUser(
+          senderID, 
+          userPublicProfile.first_name, 
+          userPublicProfile.last_name, 
+          userPublicProfile.gender
+        );
 
         sendTextMessage(senderID, "Oi, " + userPublicProfile.first_name + " vamos começar");
       });
