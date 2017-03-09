@@ -8,6 +8,24 @@ const PAGE_ACCESS_TOKEN = (process.env.PAGE_ACCESS_TOKEN) ?
   (process.env.PAGE_ACCESS_TOKEN) :
   config.get('pageAccessToken');
 
+
+module.exports.getPublicProfile = (user) => {
+  return requestPromise({
+    url: "https://graph.facebook.com/v2.6/" + user.id,
+    qs: {
+      access_token: PAGE_ACCESS_TOKEN
+    },
+    method: "Get"
+  })
+  .then((body) => {
+    console.log("Successfully set userPublicProfile.");
+    return JSON.parse(body);
+  })
+  .catch((error)=> {
+    handleError(error, "Unable to set userPublicProfile.");
+  });
+};
+
 module.exports.sendMessage = (messageData) => {
   requestPromise({
     url: "https://graph.facebook.com/v2.6/me/messages",
@@ -25,7 +43,34 @@ module.exports.sendMessage = (messageData) => {
   });
 };
 
-module.exports.setGretting = () => {
+module.exports.sendTextQuickReply = (requestJson) => {
+  requestPromise({
+    url: "https://graph.facebook.com/v2.6/me/messages",
+    qs: { access_token: PAGE_ACCESS_TOKEN },
+    method: "POST",
+    json: requestJson
+   })
+  .then((body) => {
+    const recipientId = body.recipient_id;
+    const messageId = body.message_id;
+    console.log("Successfully sent quick reply message with id %s to recipient %s",
+        messageId, recipientId);
+  })
+  .catch((error)=> {
+    handleError(error, "Unable to send quick reply.");
+  });
+};
+
+module.exports.initiate = () => {
+  setGretting();
+  setGetStartedButton();
+  setDomainWhitelisting()
+  .then(() => {
+    setPersistentMenu();
+  });
+};
+
+const setGretting = () => {
   return requestPromise({
     url: "https://graph.facebook.com/v2.6/me/thread_settings",
     qs: { access_token: PAGE_ACCESS_TOKEN },
@@ -45,7 +90,7 @@ module.exports.setGretting = () => {
   });
 };
 
-module.exports.setGetStartedButton = () => {
+const setGetStartedButton = () => {
   return requestPromise({
     url: "https://graph.facebook.com/v2.6/me/thread_settings",
     qs: {
@@ -68,7 +113,7 @@ module.exports.setGetStartedButton = () => {
   });
 };
 
-module.exports.setPersistentMenu = () => {
+const setPersistentMenu = () => {
   return requestPromise({
     url: "https://graph.facebook.com/v2.6/me/thread_settings",
     qs: { 
@@ -102,7 +147,7 @@ module.exports.setPersistentMenu = () => {
   });
 };
 
-module.exports.setDomainWhitelisting = () => {
+const setDomainWhitelisting = () => {
   return requestPromise({
     url: "https://graph.facebook.com/v2.6/me/thread_settings",
     qs: {
@@ -120,32 +165,6 @@ module.exports.setDomainWhitelisting = () => {
   })
   .catch((error)=> {
     handleError(error, "Unable to set domainWhitelisting.");
-  });
-};
-
-module.exports.getPublicProfile = (user) => {
-  return requestPromise({
-    url: "https://graph.facebook.com/v2.6/" + user.id,
-    qs: {
-      access_token: PAGE_ACCESS_TOKEN
-    },
-    method: "Get"
-  })
-  .then((body) => {
-    console.log("Successfully set userPublicProfile.");
-    return JSON.parse(body);
-  })
-  .catch((error)=> {
-    handleError(error, "Unable to set userPublicProfile.");
-  });
-};
-
-module.exports.initiate = () => {
-  this.setGretting();
-  this.setGetStartedButton();
-  this.setDomainWhitelisting()
-  .then(() => {
-    this.setPersistentMenu();
   });
 };
 
