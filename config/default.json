@@ -1,4 +1,5 @@
 {
     "facebookValidationToken": "",
-    "pageAccessToken": ""
+    "pageAccessToken": "",
+    "mongoDBUri": "localhost:27017"
 }
