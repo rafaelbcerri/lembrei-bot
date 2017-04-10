@@ -1,0 +1,9 @@
+# Ignore .git folder
+.git*
+
+# Ignore all your language-specific build folders
+node_modules*
+
+# Ignore Docker files
+.dockerignore
+Dockerfile
