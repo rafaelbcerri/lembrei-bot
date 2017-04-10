@@ -1,6 +1,6 @@
 "use strict";
 
-const 
+const
   opbeat = require('opbeat').start(),
   bodyParser = require("body-parser"),
   config = require('config'),
@@ -20,7 +20,7 @@ mongoose.connection.on('error', (error) => {
 
 const app = express();
 
-app.set("port", process.env.PORT || 5000);
+app.set("port", process.env.PORT || 8000);
 
 // app.use(bodyParser.json({ verify: verifyRequestSignature }));
 app.use(bodyParser.json());
