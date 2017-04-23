@@ -5,11 +5,13 @@ EXPOSE 8000
 RUN mkdir /app
 WORKDIR /app
 
+RUN apt-get update
+
+COPY package.json /app
+
+RUN npm install yarn &&\
+    yarn install
+
 COPY . /app
-
-RUN apt-get update &&\
-  npm install yarn
-
-RUN yarn install
 
 CMD ["node", "app.js"]
